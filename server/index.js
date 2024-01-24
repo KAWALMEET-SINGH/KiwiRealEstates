@@ -1,6 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv"
+import userRouter from "./routes/user.route.js"
 
 dotenv.config();
 
@@ -12,7 +13,16 @@ mongoose.connect(process.env.DBURI).then(() => {
 
 const app = express();
 
+app.use('/user', userRouter);
+app.get('/',(req,res) =>{
+    res.json({
+        message :'Hellp World',
+    })
+})
+
 app.listen(3000,() =>{
 console.log("server started");
 }
-)
+);
+
+
