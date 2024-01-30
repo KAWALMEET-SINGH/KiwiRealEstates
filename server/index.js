@@ -15,8 +15,8 @@ mongoose.connect(process.env.DBURI).then(() => {
 const app = express();
 app.use(express.json())
 
-app.use('/user', userRouter);
-app.use('/auth',authRouter);
+app.use('/api/user', userRouter);
+app.use('/api/auth',authRouter);
 app.get('/',(req,res) =>{
     res.json({
         message :'Hellp World',
