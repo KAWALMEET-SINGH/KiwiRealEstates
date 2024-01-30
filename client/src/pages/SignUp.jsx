@@ -1,15 +1,20 @@
 import React, { useState } from 'react'
-import {Link} from "react-router-dom"
+import {Link, useNavigate } from "react-router-dom"
 
 const SignUp = () => {
   const [formData,setFormData] = useState({});
+  const [error,setError] = useState(null);
+  const [loading,setLoading] = useState(false);
+  const navigate = useNavigate();
   const handleChange = (e) =>{
     setFormData({...formData, 
     [e.target.id]:e.target.value,
     })
   };
   const handleSubmit = async(e)=>{
-    e.preventDefault();
+    try {
+      e.preventDefault();
+    setLoading(true)
     const res =  await fetch('/api/auth/signup',{
       method: 'POST',
       headers:{
@@ -19,6 +24,21 @@ const SignUp = () => {
     });
     const data = await res.json();
     console.log(data);
+    if (data.success === false){
+      setError(data.message);
+      setLoading(false);
+      
+      return;
+    }
+    setLoading(false);
+    setError(null);
+    navigate('/sign-in')
+    } catch (error) {
+    setLoading(false);
+
+      setError(error)
+    }
+    
   }
   return (
     <>
@@ -28,13 +48,14 @@ const SignUp = () => {
         <input type='text' placeholder='username' className={`border p-4 rounded-lg`} id="username" onChange={handleChange} />
         <input type='email' placeholder='email' className={`border p-4 rounded-lg`} id="email" onChange={handleChange}/>
         <input type='password' placeholder='password' className={`border p-4 rounded-lg`} id="password" onChange={handleChange}/>
-      <button className={`bg-slate-700 text-white uppercase p-4 rounded-lg hover:opacity-95 disabled:opacity-75`} >Sign Up</button>
-      <button className={`bg-slate-700 text-white uppercase p-4 rounded-lg hover:opacity-95 disabled:opacity-75`} >Continue With Google</button>
+      <button disabled={loading} className={`bg-slate-700 text-white uppercase p-4 rounded-lg hover:opacity-95 disabled:opacity-75`} >{loading ? "Loading..." : "Sign Up" }</button>
+      <button disabled={loading} className={`bg-slate-700 text-white uppercase p-4 rounded-lg hover:opacity-95 disabled:opacity-75`} >Continue With Google</button>
       </form>
       <div className={`flex flex-row my-4 py-2 gap-2`}>
         <p>Have an account?</p>
       <Link to="/sign-in"><span className={`text-blue-700`}>Sign In</span></Link>
       </div>
+      {error && <p className={`text-red-600 mt-5`}>{error}</p>}
     </div>
     </>
   )
