@@ -47,7 +47,7 @@ const Header = () => {
           {currentUser ? (
             <Link to="/profile">
               <img
-                className="relative inline-block h-7 w-7 !rounded-full  object-cover object-center border-gray-900 "
+                className={`relative inline-block h-7 w-7 !rounded-full  object-cover object-center border-gray-900 `}
                 src={currentUser.avatar}
                 alt="profile"
               />
