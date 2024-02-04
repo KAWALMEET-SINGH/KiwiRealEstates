@@ -10,11 +10,14 @@ import {
   updateUserFailure,
   updateUserStart,
   updateUserSuccess,
+  deleteUserFailure,
+  deleteUserStart,
+  deleteUserSuccess,
 } from "../redux/user/userSlice";
 import { app } from "../firebase";
 
 const Profile = () => {
-  const { currentUser ,loading, error } = useSelector((state) => state.user);
+  const { currentUser, loading, error } = useSelector((state) => state.user);
   const dispach = useDispatch();
   const fileRef = useRef(null);
   const [file, setFile] = useState(undefined);
@@ -54,7 +57,7 @@ const Profile = () => {
       }
     );
   };
-  const handleSubmit = async(e) =>{
+  const handleSubmit = async (e) => {
     try {
       e.preventDefault();
       dispach(updateUserStart());
@@ -76,15 +79,34 @@ const Profile = () => {
       setUpdate(true);
     } catch (error) {
       dispach(updateUserFailure(error.message));
-
     }
-  }
+  };
+  const deleteUser = async () => {
+    try {
+      dispach(deleteUserStart());
+      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+        method: "DELETE",        
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        dispach(deleteUserFailure(data.message));
+        return;
+      }
+      dispach(deleteUserSuccess(data));
+
+    } catch (error) {
+      dispach(deleteUserFailure(error.message))
+    }
+  };
   return (
     <>
       <div className={`p-4 max-w-xl mx-auto`}>
         <h1 className={`text-3xl text-center font-bold my-10`}>Profile</h1>
 
-        <form  onSubmit={handleSubmit} className={`flex flex-col justify-evenly gap-3`}>
+        <form
+          onSubmit={handleSubmit}
+          className={`flex flex-col justify-evenly gap-3`}
+        >
           <input
             onChange={(e) => {
               setFile(e.target.files[0]);
@@ -139,23 +161,26 @@ const Profile = () => {
           <button
             className={`bg-green-700 text-white uppercase p-4 rounded-lg hover:opacity-95 disabled:opacity-75`}
           >
-             {loading ? "Loading..." : "Update"}
-            
+            {loading ? "Loading..." : "Update"}
           </button>
           <button
-          type="button"
+            type="button"
             className={`bg-slate-700 text-white uppercase p-4 rounded-lg hover:opacity-95 disabled:opacity-75`}
           >
             Create Listing
           </button>
         </form>
-        
+
         <div className={`flex flex-row justify-between my-3 py-2 gap-2`}>
-          <p className={`text-red-700`}>Delete Account</p>
+          <p onClick={deleteUser} className={`text-red-700`}>
+            Delete Account
+          </p>
           <p className={`text-red-700`}>Sign Out</p>
         </div>
         {error && <p className={`text-red-600 mt-2`}>{error}</p>}
-        {update && <p className={`text-green-600 mt-2`}>User Updated Successfully</p>}
+        {update && (
+          <p className={`text-green-600 mt-2`}>User Updated Successfully</p>
+        )}
       </div>
     </>
   );
