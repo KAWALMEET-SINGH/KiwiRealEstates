@@ -1,23 +1,31 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   getDownloadURL,
   getStorage,
   ref,
   uploadBytesResumable,
 } from "firebase/storage";
+import {
+  updateUserFailure,
+  updateUserStart,
+  updateUserSuccess,
+} from "../redux/user/userSlice";
 import { app } from "../firebase";
 
 const Profile = () => {
-  const { currentUser } = useSelector((state) => state.user);
+  const { currentUser ,loading, error } = useSelector((state) => state.user);
+  const dispach = useDispatch();
   const fileRef = useRef(null);
   const [file, setFile] = useState(undefined);
   const [filePercentage, setFilePercentage] = useState(0);
   const [fileError, setFileError] = useState(false);
+  const [update, setUpdate] = useState(false);
   const [formData, setFormData] = useState({});
 
-  console.log(formData);
-  const handleSubmit = () => {};
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
   useEffect(() => {
     if (file) {
       handleFileUpload(file);
@@ -34,7 +42,6 @@ const Profile = () => {
         const progress =
           (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         setFilePercentage(Math.round(progress));
-        console.log(filePercentage);
       },
       (error) => {
         setFileError(true);
@@ -47,12 +54,37 @@ const Profile = () => {
       }
     );
   };
+  const handleSubmit = async(e) =>{
+    try {
+      e.preventDefault();
+      dispach(updateUserStart());
+      const res = await fetch(`/api/user/update/${currentUser._id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      console.log(data);
+      if (data.success === false) {
+        dispach(updateUserFailure(data.message));
+
+        return;
+      }
+      dispach(updateUserSuccess(data));
+      setUpdate(true);
+    } catch (error) {
+      dispach(updateUserFailure(error.message));
+
+    }
+  }
   return (
     <>
       <div className={`p-4 max-w-xl mx-auto`}>
         <h1 className={`text-3xl text-center font-bold my-10`}>Profile</h1>
 
-        <form className={`flex flex-col justify-evenly gap-4`}>
+        <form  onSubmit={handleSubmit} className={`flex flex-col justify-evenly gap-3`}>
           <input
             onChange={(e) => {
               setFile(e.target.files[0]);
@@ -85,37 +117,45 @@ const Profile = () => {
           </p>
           <input
             type="text"
-            placeholder={"username"}
+            placeholder={currentUser.username || "username"}
             className={`border p-4 rounded-lg`}
             id="username"
+            onChange={handleChange}
           />
           <input
             type="email"
-            placeholder="email"
+            placeholder={currentUser.email || "email"}
             className={`border p-4 rounded-lg`}
             id="email"
+            onChange={handleChange}
           />
           <input
             type="password"
-            placeholder="password"
+            placeholder={"password"}
             className={`border p-4 rounded-lg`}
             id="password"
+            onChange={handleChange}
           />
           <button
             className={`bg-green-700 text-white uppercase p-4 rounded-lg hover:opacity-95 disabled:opacity-75`}
           >
-            Update
+             {loading ? "Loading..." : "Update"}
+            
           </button>
           <button
+          type="button"
             className={`bg-slate-700 text-white uppercase p-4 rounded-lg hover:opacity-95 disabled:opacity-75`}
           >
             Create Listing
           </button>
         </form>
-        <div className={`flex flex-row justify-between my-4 py-2 gap-2`}>
+        
+        <div className={`flex flex-row justify-between my-3 py-2 gap-2`}>
           <p className={`text-red-700`}>Delete Account</p>
           <p className={`text-red-700`}>Sign Out</p>
         </div>
+        {error && <p className={`text-red-600 mt-2`}>{error}</p>}
+        {update && <p className={`text-green-600 mt-2`}>User Updated Successfully</p>}
       </div>
     </>
   );
