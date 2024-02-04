@@ -13,6 +13,9 @@ import {
   deleteUserFailure,
   deleteUserStart,
   deleteUserSuccess,
+  signOutUserStart,
+  signOutUserSuccess,
+  signOutUserFailure,
 } from "../redux/user/userSlice";
 import { app } from "../firebase";
 
@@ -81,7 +84,7 @@ const Profile = () => {
       dispach(updateUserFailure(error.message));
     }
   };
-  const deleteUser = async () => {
+  const handleDeleteUser = async () => {
     try {
       dispach(deleteUserStart());
       const res = await fetch(`/api/user/delete/${currentUser._id}`, {
@@ -98,6 +101,23 @@ const Profile = () => {
       dispach(deleteUserFailure(error.message))
     }
   };
+  const handleSignOut = async() =>{
+    try {
+      dispach(signOutUserStart());
+
+      const res = await fetch('api/auth/signout');
+      const data = await res.json();
+      if (data.success === false){
+      dispach(signOutUserFailure(data.message));
+        return;
+      }
+      dispach(signOutUserSuccess(data));
+      
+    } catch (error) {
+      dispach(signOutUserFailure(error.message));
+      
+    }
+  }
   return (
     <>
       <div className={`p-4 max-w-xl mx-auto`}>
@@ -172,10 +192,10 @@ const Profile = () => {
         </form>
 
         <div className={`flex flex-row justify-between my-3 py-2 gap-2`}>
-          <p onClick={deleteUser} className={`text-red-700`}>
+          <p onClick={handleDeleteUser} className={`text-red-700`}>
             Delete Account
           </p>
-          <p className={`text-red-700`}>Sign Out</p>
+          <p onClick={handleSignOut} className={`text-red-700`}>Sign Out</p>
         </div>
         {error && <p className={`text-red-600 mt-2`}>{error}</p>}
         {update && (
