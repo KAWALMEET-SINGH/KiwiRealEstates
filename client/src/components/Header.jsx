@@ -1,17 +1,18 @@
 import React from "react";
 import { FaSearch } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Logo from "./Logo";
 import { useSelector } from "react-redux";
 
 const Header = () => {
   const { currentUser } = useSelector((state) => state.user);
+  const navigate = useNavigate();
   return (
     <header className={`bg-slate-300 shadow-md`}>
       <div
         className={`flex justify-between items-center  max-w-6xl mx-auto p-4 `}
       >
-        <section className={`flex justify-evenly items-center gap-2`}>
+        <section onClick={() => { navigate("/") }} className={`flex justify-evenly items-center gap-2`}>
           {" "}
           <Logo />{" "}
           <h1 className={`font-bold text-sm sm:text-xl flex flex-wrap`}>

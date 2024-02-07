@@ -18,10 +18,12 @@ import {
   signOutUserFailure,
 } from "../redux/user/userSlice";
 import { app } from "../firebase";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const { currentUser, loading, error } = useSelector((state) => state.user);
   const dispach = useDispatch();
+  const navigate = useNavigate();
   const fileRef = useRef(null);
   const [file, setFile] = useState(undefined);
   const [filePercentage, setFilePercentage] = useState(0);
@@ -185,6 +187,7 @@ const Profile = () => {
           </button>
           <button
             type="button"
+            onClick={()=>{navigate("/create-listing")}}
             className={`bg-slate-700 text-white uppercase p-4 rounded-lg hover:opacity-95 disabled:opacity-75`}
           >
             Create Listing

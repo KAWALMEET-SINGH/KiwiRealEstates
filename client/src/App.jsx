@@ -7,9 +7,9 @@ import SignUp from './pages/SignUp'
 import Profile from './pages/Profile'
 import Header from './components/Header'
 import PrivateRoutes from './components/PrivateRoutes'
+import CreateListing from './pages/CreateListing'
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
     <>
@@ -22,6 +22,7 @@ function App() {
           <Route path='/sign-up' element={<SignUp/>}/>
           <Route element={<PrivateRoutes/>}>
             <Route path='/profile' element={<Profile/>}/>
+            <Route path='/create-listing' element={<CreateListing/>}/>
           </Route>
         </Routes>
       </Router>
