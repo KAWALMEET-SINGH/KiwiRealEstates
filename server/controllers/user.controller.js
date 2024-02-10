@@ -9,12 +9,19 @@ export const test = (req, res) => {
   });
 };
 export const updateUser = async (req, res, next) => {
+  //if user not founr
+  const existingUser = await User.findById(req.params.id);
+
+  if (!existingUser) {
+    return next(errorHandler(404, 'You cannot update accounts connected via google')); 
+  }
   if (req.user.id !== req.params.id)
-    return next(errorHandler(401, "Invalid User Id"));
+    return next(errorHandler(401, 'You can only update your own account!'));
   try {
     if (req.body.password) {
-      req.body.password = bcryptjs.hashSync(req.body.password, 12);
+      req.body.password = bcryptjs.hashSync(req.body.password, 10);
     }
+
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
       {
@@ -27,12 +34,15 @@ export const updateUser = async (req, res, next) => {
       },
       { new: true }
     );
+
     const { password, ...rest } = updatedUser._doc;
-    res.status(201).json(rest);
+
+    res.status(200).json(rest);
   } catch (error) {
     next(error);
   }
 };
+
 
 export const deleteUser = async (req, res, next) => {
   if (req.user.id !== req.params.id)
@@ -62,3 +72,20 @@ export const getUserListing = async (req, res, next) => {
     return next(errorHandler(401, "You can only view your owm listings."));
   }
 };
+export const getUserInfo = async(req,res,next)=>{
+  try {
+    if (req.params.id === req.user.id) {
+      return next(errorHandler(401,'Searching for yourself, Try meditation.'))  
+    }
+    const user = await User.findById(req.params.id)
+    if (!user){
+      return next(errorHandler(401,'No user found'))  
+
+    }
+    const { password: pass, ...rest } = user._doc;
+
+    res.status(200).json(rest);
+  } catch (error) {
+    next(error)
+  }
+}

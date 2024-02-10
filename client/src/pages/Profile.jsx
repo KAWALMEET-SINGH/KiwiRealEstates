@@ -31,9 +31,9 @@ const Profile = () => {
   const [listingError, setListingError] = useState(false);
   const [update, setUpdate] = useState(false);
   const [listingDeleteError, setListingDeleteError] = useState(false);
-  const [formData, setFormData] = useState({});
-  const [userListings, setUserListinga] = useState([]);
-  console.log(userListings);
+  const [formData, setFormData] = useState({
+  });
+    const [userListings, setUserListinga] = useState([]);
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
