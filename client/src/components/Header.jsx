@@ -9,20 +9,21 @@ const Header = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = async(e) =>{
+  const handleSubmit = (e) => {
     e.preventDefault();
-    const urlParams = new URLSearchParams(window.location.search)
-    urlParams.set('searchTerm',searchTerm);
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('searchTerm', searchTerm);
     const searchQuery = urlParams.toString();
-    console.log(searchQuery);
     navigate(`/search?${searchQuery}`);
-  }
-useEffect(() =>{
-  const urlParams = new URLSearchParams(location.search)
- const urlTerm =  urlParams.get('searchTerm');
- setSearchTerm(urlTerm)
+  };
 
-},[location.search])
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const searchTermFromUrl = urlParams.get('searchTerm');
+    if (searchTermFromUrl) {
+      setSearchTerm(searchTermFromUrl);
+    }
+  }, [location.search]);
   return (
     <header className={`bg-slate-300 shadow-md`}>
       <div
@@ -54,7 +55,7 @@ useEffect(() =>{
             }}
             className={`bg-transparent focus:outline-none w-24 sm:w-64 md:w-41`}
           />
-          <button>
+          <button >
             <FaSearch className={`color-slate-500`} />
           </button>
         </form>

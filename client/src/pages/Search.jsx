@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ListingItem from "../components/ListingItem";
 
 const Search = () => {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ const Search = () => {
   });
   const [loading, setLoading] = useState(false);
   const [listing, setListing] = useState([]);
+  const [showMore, setShowMore] = useState(false);
 
   const handleChange = (e) => {
     if (
@@ -96,12 +98,28 @@ const Search = () => {
       const searchQuery = urlParams.toString();
       const res = await fetch(`/api/listing/get?${searchQuery}`);
       const data = await res.json();
+      if (data.length > 8) {
+        setShowMore(true);
+        
+      }else{setShowMore(false);}
       setListing(data);
       setLoading(false);
     };
     fetchListing();
   }, [location.search]);
-
+  const showMoreClick = async () => {
+    const numberOfListings = listing.length;
+    const startIndex = numberOfListings;
+    const urlParams = new URLSearchParams(location.search);
+    urlParams.set("startIndex", startIndex);
+    const searchQuery = urlParams.toString();
+    const res = await fetch(`/api/listing/get?${searchQuery}`);
+    const data = await res.json();
+    if (data.length < 9) {
+      setShowMore(false);
+    }
+    setListing([...listing, ...data]);
+  };
   return (
     <div className={`flex flex-col md:flex-row md:min-h-screen`}>
       <div className={`p-7 border-b-2 sm:border-r-2  `}>
@@ -234,12 +252,33 @@ const Search = () => {
           </button>
         </form>
       </div>
-      <div className={``}>
+      <div className={`flex flex-col flex-1`}>
         <h1
           className={`text-3xl font-semibold border-b p-3 text-slate-700 mt-5`}
         >
           Results:
         </h1>
+        <div className={`p-3 flex flex-wrap gap-5`}>
+          {!loading && listing.length === 0 && (
+            <p className={`text-2xl text-red-700 `}>No Listing Found!</p>
+          )}
+          {loading && <p className={`text-2xl text-slate-700 `}>Loading...</p>}
+          {!loading &&
+            listing &&
+            listing.map((listing) => (
+              <ListingItem key={listing._id} listing={listing} />
+            ))}
+          {showMore && (
+            <button
+              className={`text-green-700 hover:underline text-center w-full`}
+              onClick={() => {
+                showMoreClick();
+              }}
+            >
+              Show More
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

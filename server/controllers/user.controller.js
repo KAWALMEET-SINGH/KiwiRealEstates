@@ -13,7 +13,7 @@ export const updateUser = async (req, res, next) => {
   const existingUser = await User.findById(req.params.id);
 
   if (!existingUser) {
-    return next(errorHandler(404, 'You cannot update accounts connected via google')); 
+    return next(errorHandler(404, 'You cannot update non existant accounts')); 
   }
   if (req.user.id !== req.params.id)
     return next(errorHandler(401, 'You can only update your own account!'));
